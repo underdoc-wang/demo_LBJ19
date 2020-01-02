@@ -89,7 +89,7 @@ def testModel(model, modelName, height, width, pmax, which_type, user_name, test
                 tensor = np.zeros(shape = (height, width, 1))
                 for item in json_data['features']:
                     value = item['properties'][which_type]
-                    tensor[height-1-item['properties']['index'][1]][item['properties']['index'][0]] = value*1e4 if value >= 0 else 0
+                    tensor[height-1-item['properties']['index'][1]][item['properties']['index'][0]] = value if value > 0 else 0 #value*1e4 if value > 0 else 0
                 XS.append(tensor)
                 
             if len(XS) >= timesteps and len(XS) != watcher:   # starts when seq len >=3
@@ -105,7 +105,7 @@ def testModel(model, modelName, height, width, pmax, which_type, user_name, test
                 # print(y_hat)
                 
                 # output
-                json_out(json_data, y_hat[0]/1e4, tempPath, filename, which_type)
+                json_out(json_data, y_hat[0], tempPath, filename, which_type)
                 shutil.move(tempPath + '/' + filename, outputPath)
                 watcher = len(XS)
     return None
