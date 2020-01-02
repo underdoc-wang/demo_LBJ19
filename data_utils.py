@@ -77,10 +77,9 @@ def json_in_test(input_dir, type):
         tensor = np.zeros(shape=(nrow, ncol, 1))
         # assign values to the matrix
         for item in json_data['features']:
-            tensor[nrow - 1 - item['properties']['index'][1]][item['properties']['index'][0]] = int(
-                item['properties'][type])
+            tensor[nrow - 1 - item['properties']['index'][1]][item['properties']['index'][0]] = item['properties'][type]
             if int(item['properties'][type]) > max_:
-                max_ = int(item['properties'][type])
+                max_ = item['properties'][type]
 
         out_seq.append(tensor)
 
