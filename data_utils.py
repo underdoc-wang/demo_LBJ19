@@ -84,5 +84,5 @@ def json_in_test(input_dir, type):
         out_seq.append(tensor)
 
     out_seq = np.array(out_seq)
-    return out_seq, nrow, ncol, max_
+    return out_seq, nrow, ncol
 

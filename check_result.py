@@ -1,3 +1,4 @@
+import os
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,14 +14,14 @@ def check_train(train_dir):
     return None
 
 def check_pred(pred_dir, back_dir, type, images_dir):
-    test_data, height, width, max_ = json_in_test(back_dir, type)
+    test_data, H, W = json_in_test(back_dir, type)
     print('test shape', test_data.shape)
     print('test non-zero: \n', test_data[test_data > 0].shape[0])
 
-    pred_data, height, width, max_ = json_in_test(pred_dir, type)
+    pred_data, H, W = json_in_test(pred_dir, type)
     print('pred shape', pred_data.shape)
     print('pred non-zero: \n', pred_data[np.nonzero(pred_data)].shape[0])
-
+    '''
     # print images
     step = 0
     # ground truth
@@ -31,6 +32,24 @@ def check_pred(pred_dir, back_dir, type, images_dir):
     # predicted value
     plt.imshow(pred_data[step,:,:,0])
     plt.savefig(images_dir + '/pred/' + str(i)+'.png')
+    '''
+    return None
+
+def evaluate_result(pred_dir, test_dir, type):
+    pred_data, H_pred, W_pred = json_in_test(pred_dir, type)
+    test_data, H_test, W_test = json_in_test(test_dir, type)
+    assert H_pred == H_test, 'pred-test not in same dimension: H'
+    assert W_pred == W_test, 'pred-test not in same dimension: W'
+
+    # evaluate
+    y_pred = pred_data[:-1]
+    y_true = test_data[3:]
+    assert y_pred.shape == y_true.shape, 'pred-true not in same dimension'
+    print(y_pred.shape)
+
+    mse = ((y_pred - y_true)**2).mean(axis=None)
+    print('Total MSE:', round(mse, 4))
+
 
     return None
 
@@ -52,7 +71,7 @@ def main():
 
     #check_train(trainPath)
     check_pred(outputPath, backPath, args.which_type, imgPath)
-
+    evaluate_result(outputPath, backPath, args.which_type)
 
 
 if __name__ == '__main__':
