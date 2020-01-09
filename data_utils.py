@@ -18,7 +18,7 @@ def json_in_train(input_dir):
         tensor = np.zeros(shape = (nrow, ncol, 1))
         for i, item in enumerate(json_data['values']):
             # filter each item
-            #item *= 1e4
+            item *= 1e2
             #if item < 1:
             #    item = 0
             tensor[int(i/ncol)][ncol-i%ncol-1] = item if item >= 0 else 0     # filter out -1

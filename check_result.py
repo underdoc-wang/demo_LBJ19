@@ -21,18 +21,18 @@ def check_pred(pred_dir, back_dir, type, images_dir):
     pred_data, H, W = json_in_test(pred_dir, type)
     print('pred shape', pred_data.shape)
     print('pred non-zero: \n', pred_data[np.nonzero(pred_data)].shape[0])
-    '''
+
     # print images
     step = 0
     # ground truth
     for i in range(4):
         plt.imshow(test_data[step+i,:,:,0])
-        plt.savefig(images_dir + '/test/' + str(i)+'.png')
+        plt.savefig(os.path.join(images_dir, str(i)+'.png'))
 
     # predicted value
     plt.imshow(pred_data[step,:,:,0])
-    plt.savefig(images_dir + '/pred/' + str(i)+'.png')
-    '''
+    plt.savefig(os.path.join(images_dir, str(i)+'_pred.png'))
+
     return None
 
 def evaluate_result(pred_dir, test_dir, type):
@@ -56,18 +56,24 @@ def evaluate_result(pred_dir, test_dir, type):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--which_type', default = 'count', type = str,
-                        choices = ['count', 'stay'], help = "'count' or 'stay'")
+    parser.add_argument('--which_type', default = 'normalize', type = str,
+                        choices = ['count', 'stay', 'normalize'], help = "'count' or 'stay' or 'normalize'")
     parser.add_argument('--user_ID', type = str, help = 'Specify user ID')
     parser.add_argument('--user_name', type = str, help = 'Specify user name')
-    parser.add_argument('--model_name', type=str, default='STResNet', help='Specify model name')
+    #parser.add_argument('--model_name', type=str, default='STResNet', help='Specify model name')
 
     args = parser.parse_args()
+
+    # model name depends on which_type
+    if args.which_type in ['count']:
+        modelName = 'STResNet'
+    elif args.which_type in ['stay', 'normalize']:
+        modelName = 'ConvLSTM'
 
     trainPath = './' + args.user_ID + '/jsonfile'
     outputPath = './' + args.user_ID + '/output'
     backPath = './' + args.user_ID + '/oldbackup'
-    imgPath = './' + args.user_ID + '/images/' + args.model_name
+    imgPath = './' + args.user_ID + '/images/' + modelName
 
     #check_train(trainPath)
     check_pred(outputPath, backPath, args.which_type, imgPath)

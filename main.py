@@ -83,13 +83,15 @@ def testModel(model, modelName, height, width, pmax, which_type, user_name, test
                 # filename = file.split('/')[-1]
                 # os.rename(file, testPath + '/.' + filename)   # hide file
                 # os.remove(file)   # delete file
+                if os.path.exists(os.path.join(backPath, filename)):
+                    os.remove(os.path.join(backPath, filename))      # delete existing
                 shutil.move(file, backPath)     # move file to backup path
                 print(time.ctime(), 'New json input:', file)
                 
                 tensor = np.zeros(shape = (height, width, 1))
                 for item in json_data['features']:
                     value = item['properties'][which_type]
-                    tensor[height-1-item['properties']['index'][1]][item['properties']['index'][0]] = value if value > 0 else 0 #value*1e4 if value > 0 else 0
+                    tensor[height-1-item['properties']['index'][1]][item['properties']['index'][0]] = value*1e2 if value > 0 else 0 #value*1e4 if value > 0 else 0
                 XS.append(tensor)
                 
             if len(XS) >= timesteps and len(XS) != watcher:   # starts when seq len >=3
@@ -105,7 +107,9 @@ def testModel(model, modelName, height, width, pmax, which_type, user_name, test
                 # print(y_hat)
                 
                 # output
-                json_out(json_data, y_hat[0], tempPath, filename, which_type)
+                json_out(json_data, y_hat[0]/1e2, tempPath, filename, which_type)
+                if os.path.exists(os.path.join(outputPath, filename)):
+                    os.remove(os.path.join(outputPath, filename))      # delete existing pred
                 shutil.move(tempPath + '/' + filename, outputPath)
                 watcher = len(XS)
     return None
@@ -131,11 +135,11 @@ def main():
     parser.add_argument('--train_mode', default = 2, type = int,
                         choices = range(3), help = '0:test only / 1:train only / 2:train+test')
     parser.add_argument('--time_interval', default = 10, type = int, help = 'Time interval in minute')
-    parser.add_argument('--which_type', default = 'count', type = str,
-                        choices = ['count', 'stay'], help = "'count' or 'stay'")
+    parser.add_argument('--which_type', default = 'normalize', type = str,
+                        choices = ['count', 'stay', 'normalize'], help = "'count' or 'stay' or 'normalize'")
     parser.add_argument('--user_ID', type = str, help = 'Specify user ID')
     parser.add_argument('--user_name', type = str, help = 'Specify user name')
-    parser.add_argument('--model_name', type=str, default='STResNet', help='Specify model name')
+    #parser.add_argument('--model_name', type=str, default='STResNet', help='Specify model name')
     parser.add_argument('--GPU', type=str, help='Specify which GPU to run with (-1 for run on CPU)', default='-1')
     
     args = parser.parse_args()
@@ -166,7 +170,11 @@ def main():
     if not os.path.exists(absbackPath):
         os.makedirs(absbackPath)
 
-    modelName = args.model_name
+    # model name depends on which_type
+    if args.which_type in ['count']:
+        modelName = 'STResNet'
+    elif args.which_type in ['stay', 'normalize']:
+        modelName = 'ConvLSTM'
 
     # get train data
     trainX, trainY, height, width, max_ = getTrainXY(trainPath)

@@ -16,10 +16,10 @@ def convlstm(seq_input):
     model.add(ConvLSTM2D(filters = 32, kernel_size = (3, 3),
                        padding = 'same', return_sequences = True))
     model.add(BatchNormalization())
-    model.add(ConvLSTM2D(filters = 32, kernel_size = (3, 3),
+    model.add(ConvLSTM2D(filters = 1, kernel_size = (3, 3), activation = 'relu',
                        padding = 'same', return_sequences = False))
-    model.add(BatchNormalization())
-    model.add(Conv2D(filters = channel, kernel_size = (1, 1), padding = 'same', activation = 'relu'))
+    #model.add(BatchNormalization())
+    #model.add(Conv2D(filters = channel, kernel_size = (1, 1), padding = 'same', activation = 'relu'))
 
     return model
 
