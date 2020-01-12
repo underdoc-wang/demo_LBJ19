@@ -4,6 +4,7 @@ import numpy as np
 from glob import glob
 
 timesteps = 3
+beta = 1e2
 
 def json_in_train(input_dir):
     input_seq = []
@@ -17,8 +18,8 @@ def json_in_train(input_dir):
         # +time
         tensor = np.zeros(shape = (nrow, ncol, 1))
         for i, item in enumerate(json_data['values']):
+            item *= beta     # rescale for stay/normalize
             # filter each item
-            item *= 1e2
             #if item < 1:
             #    item = 0
             tensor[int(i/ncol)][ncol-i%ncol-1] = item if item >= 0 else 0     # filter out -1
@@ -52,16 +53,16 @@ def json_out(dic, y_hat, out_dir, out_name, which_type):
         i = y_hat.shape[0] - 1 - item['properties']['index'][1]
         j = item['properties']['index'][0]
         # print(type(y_hat[i][j][0]))
-        item['properties'][which_type] = float(y_hat[i][j][0])
+        #item['properties'][which_type] = float(y_hat[i][j][0])
+        item['properties']['stay'] = float(y_hat[i][j][0])     # fix 'stay'
 
     with open(out_dir + '/' + out_name, 'w') as outfile:
         json.dump(dic, outfile)
     return None
 
 
-def json_in_test(input_dir, type):
+def json_in_test(input_dir, which_type):
     out_seq = []
-    max_ = 0
 
     for file in sorted(glob(os.path.join(input_dir, '*.json'))):
         with open(file) as json_file:
@@ -75,11 +76,10 @@ def json_in_test(input_dir, type):
         nrow, ncol = max(row) + 1, max(col) + 1
         # initiate a matrix with zeros
         tensor = np.zeros(shape=(nrow, ncol, 1))
-        # assign values to the matrix
+        # assign values to the matrix - fix 'stay'
         for item in json_data['features']:
-            tensor[nrow - 1 - item['properties']['index'][1]][item['properties']['index'][0]] = item['properties'][type]
-            if int(item['properties'][type]) > max_:
-                max_ = item['properties'][type]
+            #tensor[nrow - 1 - item['properties']['index'][1]][item['properties']['index'][0]] = item['properties'][which_type]
+            tensor[nrow - 1 - item['properties']['index'][1]][item['properties']['index'][0]] = item['properties']['stay']
 
         out_seq.append(tensor)
 
