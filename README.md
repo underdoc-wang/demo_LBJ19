@@ -1,9 +1,9 @@
 ## LBJ 2019 Exhibit
-[Location Business Japan (LBJ)](https://www.f2ff.jp/2019/lbj/) @MMakuhari Messe, Chiba, 6/12-14, 2019
-<br>Largest event in Japan to gain business opportunities in location technology.
+[Location Business Japan (LBJ)](https://www.f2ff.jp/2019/lbj/) @Makuhari Messe, Chiba, Japan 6/12-14, 2019.
+<br>The largest event in Japan to gain new business opportunities in emerging location technologies.
 
-<p align="center"><img src="figures/LBJ19-poster.jpg" width="50%" height="50%"></p>
-** Fig 1. Team Demo Poster. **
+<p align="center"><img src="figures/LBJ19-poster.jpg" width="75%" height="75%"></p>
+**Team Demo Poster**
 
 ## References
 The implementation of applied predictive model is based on the papers listed below:
