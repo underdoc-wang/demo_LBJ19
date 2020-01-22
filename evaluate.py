@@ -3,7 +3,6 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 from data_utils import json_in_train, json_in_test
-from main import timesteps
 
 
 def check_train(train_dir):
@@ -44,16 +43,39 @@ def evaluate_result(pred_dir, test_dir, type):
     assert H_pred == H_test, 'pred-test not in same dimension: H'
     assert W_pred == W_test, 'pred-test not in same dimension: W'
 
-    # evaluate
+    # seq for evaluation
     y_pred = pred_data[:-1]
-    y_true = test_data[timesteps:]
-    assert y_pred.shape == y_true.shape, 'pred-true not in same dimension'
-    print(y_pred.shape)
+    y_true = test_data[1:]
+    assert y_pred.shape == y_true.shape, 'pred-true not in same dimension'+str(y_pred.shape)+str(y_true.shape)
 
-    mse = ((y_pred - y_true)**2).mean(axis=None)
-    print('Sequence MSE:', round(mse, 4))
+    mse_lst = []
+    # evaluate on every timestamp
+    for t in range(y_pred.shape[0]):
+        print('Evaluating timestamp ', t)
+        y_pred_t, y_true_t = y_pred[t,:,:,:], y_true[t,:,:,:]
+
+        y_pred_t_mask = y_pred_t[(y_true_t > 0).all(axis=-1)]    # y_pred masked by (y_true > 0)
+        y_true_t_nonz = y_true_t[y_true_t > 0]
+        mse_t = ((y_pred_t_mask - y_true_t_nonz)**2).mean(axis=None)
+        print('MSE: ', round(mse_t, 4))
+        mse_lst.append(mse_t)
+
+    # plot MSE
+    x = range(y_pred.shape[0])
+    y = mse_lst
+    plt.plot(x, y)
+    plt.title('MSE along Time')
+    #plt.show()
+    plt.savefig(pred_dir+'/eval_MSE_plot.png')
+
+    #mse = ((y_pred - y_true)**2).mean(axis=None)
+    #print('Sequence MSE:', round(mse, 4))
 
     return None
+
+
+# global
+timesteps = 3
 
 
 def main():
@@ -62,7 +84,6 @@ def main():
                         choices = ['count', 'stay', 'normalize'], help = "'count' or 'stay' or 'normalize'")
     parser.add_argument('-id', '--user_ID', type = str, help = 'Specify user ID')
     parser.add_argument('-name', '--user_name', type = str, help = 'Specify user name')
-    #parser.add_argument('--model_name', type=str, default='STResNet', help='Specify model name')
 
     args = parser.parse_args()
 
@@ -73,12 +94,12 @@ def main():
         modelName = 'ConvLSTM'
 
     trainPath = './' + args.user_ID + '/jsonfile'
-    outputPath = './' + args.user_ID + '/output'
+    outputPath = './' + args.user_ID + '/backup'
     backPath = './' + args.user_ID + '/oldbackup'
     imgPath = './' + args.user_ID + '/images/' + modelName
 
     #check_train(trainPath)
-    check_pred(outputPath, backPath, args.which_type, imgPath)
+    #check_pred(outputPath, backPath, args.which_type, imgPath)
     evaluate_result(outputPath, backPath, args.which_type)
 
 
